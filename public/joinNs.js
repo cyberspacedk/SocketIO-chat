@@ -45,7 +45,7 @@ function joinNs(endpoint) {
                             </div>
                             <div class="user-message">
                                 <div class="user-name-time">${message.username} 
-                                    <span>${message.time}</span>
+                                  <span id="time" class="badge badge-warning">${message.time}</span> 
                                 </div>
                                 <div class="message-text">${message.text}</div>
                             </div>

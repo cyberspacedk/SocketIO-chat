@@ -2,13 +2,13 @@ const express = require("express");
 const app = express();
 const socketio = require("socket.io");
 
-// забираем массив созданных комнат
-let namespaces = require("./data/namespaces");
-
 app.use(express.static(__dirname + "/public/chat.html"));
 
 const expressServer = app.listen(9000);
 const io = socketio(expressServer);
+
+// забираем массив созданных комнат
+let namespaces = require("./data/namespaces"); 
 
 io.on("connection", socket => {
   // создадим массив данных в котором будет лежать enpoint и картинка пространства
@@ -66,7 +66,7 @@ namespaces.forEach(namespace => {
       const fullMessage = {
         text: message,
         time: new Date(Date.now()).toLocaleString(),
-        username: "some username",
+        username: "username",
         avatar: "https://via.placeholder.com/30"
       };
 

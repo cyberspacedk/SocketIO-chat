@@ -7,8 +7,7 @@ body{
     background-color: #282c34;
     min-height: 100vh;
     color: #ABB2BF;
-    text-align: center;
-
+    text-align: center; 
 }
 
 .namespaces img{
@@ -53,13 +52,24 @@ body{
     padding-top: 10px;
 }
 .chat-panel .curr-room-text{
-    color: #282c34;
+    color: #fff;
     font-size: 26px;
+    background-color: rgb(0, 131, 39);
+    border-radius: 5px;
+    padding: 5px 10px;
+   
+}
+.chat-info{
+    transform: translateX(-50px);
 }
 .curr-room-num-users, .search{
     font-size: 14px;
-    color: #ABB2BF;
+    color: #fff;
     position: realtive;
+    background-color: rgb(187, 0, 103);
+    padding: 3px;
+    border-radius: 3px;
+    font-weight: 600;
 }
 
 .search{
@@ -88,13 +98,14 @@ input {
     color: #ABB2BF; 
     border: 1px solid #3B4048; 
     border-radius: 5px;
-    padding-left: 5px;
+    padding: 20px 15px;
 }
+ 
 #messages { 
     list-style-type: none; margin: 0; padding: 0; 
     color: #3B4048;
     max-height: 85%;
-    overflow: scroll;
+    overflow-y: scroll;
 }
 #messages li .user-image{
     /* width: 50px; */
@@ -105,9 +116,6 @@ input {
     color: #222;
 }
 
-#messages li .user-name-time span{
-    color: #ABB2BF;
-}
 
 #messages li { 
     padding: 5px 10px; 
@@ -115,10 +123,18 @@ input {
     align-items: stretch;
 }
 
+form{
+    display: flex;
+    margin-bottom: 30px;
+}
 
+[type="submit"]{
+    height: 42px;
+}
 
-
-
-
+ 
+.user-name-time{
+    font-weight: 700;
+}
 
 

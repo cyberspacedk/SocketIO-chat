@@ -7,7 +7,7 @@ function joinRoom(roomName) {
     document.querySelector(".curr-room-text").innerText = roomName;
 
     const countOfMembers = document.querySelector(".curr-room-num-users");
-    const countMarkup = `${countMembers} <span class="glyphicon glyphicon-user"></span>`;
+    const countMarkup = `Active users ${countMembers}`;
     countOfMembers.innerHTML = countMarkup;
   });
 
@@ -20,7 +20,7 @@ function joinRoom(roomName) {
         </div>
         <div class="user-message">
             <div class="user-name-time">${username}
-                <span>${time}</span>
+                <span id="time" class="badge badge-warning">${time}</span>
             </div>
             <div class="message-text">${text}</div>
         </div>
