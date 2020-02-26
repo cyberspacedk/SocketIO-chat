@@ -1,24 +1,29 @@
-// соединяемся с пространством / при этом срабатвает событие connection
+// INITIAL CONNECT
 const socketAdmin = io("http://localhost:9000");
 
-// объявим переменную, которая будет достпка везде в коде
+// DEFINE GLOBAL VARIABLE
 let nsSocket = null;
 
 socketAdmin.on("nsData", nameSpaces => {
-  // размапим в DOM полученный массив с инфой о пространствах
-  // получаем контейнер
-  const nameSpaceContainer = document.querySelector(".namespaces");
-
-  // маппим в разметку
+  // MAP GETTING NAMESPACE ARRAY FROM SERVER
   const spaceItem = nameSpaces
     .map(
       ({ img, endpoint }) =>
         `<div class="namespace" endpoint="${endpoint}"><img src="${img}"/></div>`
     )
     .join("");
-  // вставляем в контейнер
-  nameSpaceContainer.innerHTML = spaceItem;
+  document.querySelector(".namespaces").innerHTML = spaceItem;
 
-  // вызываем коннект к пространству /wiki
-  joinNs("/wiki");
+  // ADD LISTENER FOR CLICK ON NAMESPACE
+  // 1. select all namespaces
+  // 2. add to each event click listener
+  // 3. get endpoint of clicked namespace
+  // 4. connect with this namespace by calling joinNs func
+  [...document.querySelectorAll(".namespace")].forEach(namespace => {
+    namespace.addEventListener("click", () => {
+      const nsEndpoint = namespace.getAttribute("endpoint");
+      console.log(nsEndpoint);
+      joinNs(nsEndpoint);
+    });
+  });
 });

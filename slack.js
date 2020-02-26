@@ -7,51 +7,52 @@ app.use(express.static(__dirname + "/public/chat.html"));
 const expressServer = app.listen(9000);
 const io = socketio(expressServer);
 
-// забираем массив созданных комнат
-let namespaces = require("./data/namespaces"); 
+// grab array of created namespaces
+let namespaces = require("./data/namespaces");
 
+// INITIAL CONNECTION
 io.on("connection", socket => {
-  // создадим массив данных в котором будет лежать enpoint и картинка пространства
-  // итерируем имеющийся массив и забираем нужные данные
+  //  create an array with img and enpoint only
   let nameSpaceData = namespaces.map(({ img, endpoint }) => ({
     img,
     endpoint
   }));
 
-  // отправляем сформированный массив на клиент
+  // send created array to client
   socket.emit("nsData", nameSpaceData);
 });
 
-// пройдемся по массиву пространств и соединимся (установим слушателя) с пространсвами
+// ADD LISTENERS TO EACH NAMESPACES
 namespaces.forEach(namespace => {
-  // в of() попадет имя пространства /wiki /linux /mozilla
+  // connect each namespace
   io.of(namespace.endpoint).on("connection", nsSocket => {
-    // высылаем на клиент список комнат
-    nsSocket.emit("nsRoomLoad", namespaces[0].rooms);
+    // send to client all rooms belongs to the namespace
+    nsSocket.emit("nsRoomLoad", namespace.rooms);
 
-    // слушаем какая комната присоединилась
+    // WORK WITH CONCERN ROOM
+    //  listen what room is connected
     nsSocket.on("joinRoom", joinedRoom => {
       nsSocket.join(joinedRoom);
 
-      // найдем ту самую комнату
+      // find data of this room among other rooms
       const nsRoom = namespace.rooms.find(
         item => item.roomTitle === joinedRoom.trim()
       );
 
-      // отправим на клиент историю сообщений
+      // send to client found room chat history
       nsSocket.emit("historyCatchUp", nsRoom.history);
 
-      // также отправим всем участникам комнаты количество участников
-      io.of("/wiki")
+      // also send all active members of this room
+      io.of(namespace.endpoint)
         .in(joinedRoom)
         .clients((err, clients) => {
-          io.of("/wiki")
+          io.of(namespace.endpoint)
             .in(joinedRoom)
             .emit("updateMembers", clients.length);
         });
     });
 
-    // слушаем событие нового сообщения
+    // LISTEN NEW MESSAGE
     nsSocket.on("newMessageToServer", message => {
       // при получении сообщения нужно выяснить какая комната его отправила
       // в nsSocket.rooms лежит объект в котором находится информация
@@ -80,7 +81,7 @@ namespaces.forEach(namespace => {
 
       // далее нужно отослать полученное сообщение в соответствующую комнату
       // выберем пространство, выберем комнату, эмитим сообщение
-      io.of("/wiki")
+      io.of(namespace.endpoint)
         .to(roomTitle)
         .emit("messageToClients", fullMessage);
     });

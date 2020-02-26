@@ -1,5 +1,15 @@
 function joinNs(endpoint) {
-  // соединимся с пространством по endpoint
+  // CLOSE PREVIOUS CONNECTION AND REMOVE EVENT LISTENER
+  if (nsSocket) {
+    console.log(nsSocket);
+    nsSocket.close();
+    document.querySelector("#messages").innerHTML = "";
+    document
+      .querySelector(".message-form")
+      .removeEventListener("submit", newMessage);
+  }
+
+  // NEW CONNECTION
   nsSocket = io(`http://localhost:9000${endpoint}`);
 
   // когда приозойдет соединение с сервера выстрелится событие nsRoomLoad
@@ -53,13 +63,17 @@ function joinNs(endpoint) {
 
     document.querySelector("#messages").innerHTML += messageItem;
   });
+  document
+    .querySelector(".message-form")
+    .addEventListener("submit", newMessage);
 }
 
 // выберем форму, обработаем событие сабмита и получим значение инпута
-document.querySelector(".message-form").addEventListener("submit", e => {
+function newMessage(e) {
   e.preventDefault();
   const newMessage = document.querySelector("#user-message").value;
+  if (!newMessage) return;
   // отправим сообщение на сервер
   nsSocket.emit("newMessageToServer", newMessage);
   e.target.reset();
-});
+}
