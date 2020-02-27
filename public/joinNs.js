@@ -1,7 +1,6 @@
 function joinNs(endpoint) {
   // CLOSE PREVIOUS CONNECTION AND REMOVE EVENT LISTENER
   if (nsSocket) {
-    console.log(nsSocket);
     nsSocket.close();
     document.querySelector("#messages").innerHTML = "";
     document
@@ -33,11 +32,12 @@ function joinNs(endpoint) {
     // отобразим список комнат
     roomList.innerHTML = mappedRooms;
 
-    // выберем комнаты
+    // CHOOSE ALL ROOMS
     const rooms = [...document.querySelectorAll(".room")];
 
+    // call joinRoom with concern room
     rooms.forEach(room => {
-      room.addEventListener("click", e => console.log(e));
+      room.addEventListener("click", e => joinRoom(e.target.innerText));
     });
 
     // получим имя комнаты пространтсва

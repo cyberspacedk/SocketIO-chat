@@ -32,24 +32,21 @@ namespaces.forEach(namespace => {
     // WORK WITH CONCERN ROOM
     //  listen what room is connected
     nsSocket.on("joinRoom", joinedRoom => {
+      const roomToLeave = Object.keys(nsSocket.rooms)[1];
+      nsSocket.leave(roomToLeave);
+      updateUsersInRoom(namespace, roomToLeave);
       nsSocket.join(joinedRoom);
 
       // find data of this room among other rooms
-      const nsRoom = namespace.rooms.find(
-        item => item.roomTitle === joinedRoom.trim()
-      );
+      const nsRoom =
+        joinedRoom &&
+        namespace.rooms.find(item => item.roomTitle === joinedRoom.trim());
 
       // send to client found room chat history
       nsSocket.emit("historyCatchUp", nsRoom.history);
 
       // also send all active members of this room
-      io.of(namespace.endpoint)
-        .in(joinedRoom)
-        .clients((err, clients) => {
-          io.of(namespace.endpoint)
-            .in(joinedRoom)
-            .emit("updateMembers", clients.length);
-        });
+      updateUsersInRoom(namespace, joinedRoom);
     });
 
     // LISTEN NEW MESSAGE
@@ -87,3 +84,13 @@ namespaces.forEach(namespace => {
     });
   });
 });
+
+function updateUsersInRoom(namespace, joinedRoom) {
+  io.of(namespace.endpoint)
+    .in(joinedRoom)
+    .clients((err, clients) => {
+      io.of(namespace.endpoint)
+        .in(joinedRoom)
+        .emit("updateMembers", clients.length);
+    });
+}
