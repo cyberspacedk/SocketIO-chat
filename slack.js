@@ -11,14 +11,10 @@ const io = socketio(expressServer);
 let namespaces = require("./data/namespaces");
 
 // INITIAL CONNECTION
-io.on("connection", socket => {
+io.on("connection", socket => { 
   //  create an array with img and enpoint only
-  let nameSpaceData = namespaces.map(({ img, endpoint }) => ({
-    img,
-    endpoint
-  }));
-
-  // send created array to client
+  let nameSpaceData = namespaces.map(({ img, endpoint }) => ({ img, endpoint })); 
+  // send created array with data about namespaces to client
   socket.emit("nsData", nameSpaceData);
 });
 
@@ -26,6 +22,7 @@ io.on("connection", socket => {
 namespaces.forEach(namespace => {
   // connect each namespace
   io.of(namespace.endpoint).on("connection", nsSocket => {
+    const username = nsSocket.handshake.query.username; 
     // send to client all rooms belongs to the namespace
     nsSocket.emit("nsRoomLoad", namespace.rooms);
 
@@ -38,8 +35,7 @@ namespaces.forEach(namespace => {
       nsSocket.join(joinedRoom);
 
       // find data of this room among other rooms
-      const nsRoom =
-        joinedRoom &&
+      const nsRoom = joinedRoom &&
         namespace.rooms.find(item => item.roomTitle === joinedRoom.trim());
 
       // send to client found room chat history
@@ -64,12 +60,12 @@ namespaces.forEach(namespace => {
       const fullMessage = {
         text: message,
         time: new Date(Date.now()).toLocaleString(),
-        username: "username",
+        username,
         avatar: "https://via.placeholder.com/30"
       };
 
       // найдем ту самую комнату
-      const nsRoom = namespace.rooms.find(
+      const nsRoom = roomTitle && namespace.rooms.find(
         item => item.roomTitle === roomTitle.trim()
       );
 
@@ -78,19 +74,14 @@ namespaces.forEach(namespace => {
 
       // далее нужно отослать полученное сообщение в соответствующую комнату
       // выберем пространство, выберем комнату, эмитим сообщение
-      io.of(namespace.endpoint)
-        .to(roomTitle)
-        .emit("messageToClients", fullMessage);
+      io.of(namespace.endpoint).to(roomTitle).emit("messageToClients", fullMessage);
     });
   });
 });
 
+// HELPER FUNC
 function updateUsersInRoom(namespace, joinedRoom) {
-  io.of(namespace.endpoint)
-    .in(joinedRoom)
-    .clients((err, clients) => {
-      io.of(namespace.endpoint)
-        .in(joinedRoom)
-        .emit("updateMembers", clients.length);
+  io.of(namespace.endpoint).in(joinedRoom).clients((err, clients) => {
+      io.of(namespace.endpoint).in(joinedRoom).emit("updateMembers", clients.length);
     });
 }

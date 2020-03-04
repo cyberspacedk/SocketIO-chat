@@ -1,17 +1,14 @@
 function joinRoom(roomName) {
-  // пошлем на сервер имя комнаты
+  // when room connected SEND to server its name
   nsSocket.emit("joinRoom", roomName, newNumberOfMembers => {});
 
+  // SET TO UI CURRENT ROOM NAME AND COUNT OF MEMBERS
   nsSocket.on("updateMembers", countMembers => {
-    // выберем из DOM элементы которы отображают имя комнаты и количество участников
     document.querySelector(".curr-room-text").innerText = roomName;
-
-    const countOfMembers = document.querySelector(".curr-room-num-users");
-    const countMarkup = `Active users ${countMembers}`;
-    countOfMembers.innerHTML = countMarkup;
+    document.querySelector(".curr-room-num-users").innerHTML = `Active users ${countMembers}`;;
   });
 
-  //  подписываемся на получение истории сообщений и мапим их в список
+  //  GET HISTORY FROM SERVER AND MAP TO HTML
   nsSocket.on("historyCatchUp", history => {
     const renderMessageItem = ({ avatar, username, time, text }) =>
       ` <li>
@@ -28,9 +25,9 @@ function joinRoom(roomName) {
 
     const chatHistory = history.map(item => renderMessageItem(item)).join("");
     const chatList = document.querySelector("#messages");
-    chatList.innerHTML += chatHistory;
+    chatList.innerHTML = chatHistory;
 
-    // move to last message
+    // scroll page to last message
     chatList.scrollTo(0, chatList.scrollHeight);
   });
 }

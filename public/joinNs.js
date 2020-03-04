@@ -3,51 +3,32 @@ function joinNs(endpoint) {
   if (nsSocket) {
     nsSocket.close();
     document.querySelector("#messages").innerHTML = "";
-    document
-      .querySelector(".message-form")
-      .removeEventListener("submit", newMessage);
+    document.querySelector(".message-form").removeEventListener("submit", newMessage);
   }
 
-  // NEW CONNECTION
+  // STORE IN GLOBAL VARIABLE NEW CONNECTION
   nsSocket = io(`http://localhost:9000${endpoint}`);
 
-  // когда приозойдет соединение с сервера выстрелится событие nsRoomLoad
-  // которое эмитит массив комнат пространства
-  nsSocket.on("nsRoomLoad", nsRooms => {
-    // выберем элемент для отрисовки списка комнат
-    const roomList = document.querySelector(".room-list");
-
-    // размапим комнаты в разметку
-    const mappedRooms = nsRooms
-      .map(({ roomTitle, privateRoom }) => {
-        let icon = privateRoom ? "lock" : "globe";
-
-        return `<li class="room">
-                   <span class="glyphicon glyphicon-${icon}"></span>
-                  ${roomTitle}
-               </li>`;
-      })
-      .join("");
-
-    // отобразим список комнат
-    roomList.innerHTML = mappedRooms;
+  // LOADS ROOMS BELONGS TO NAMESPACE
+  nsSocket.on("nsRoomLoad", nsRooms => {  
+    // MAP ROOMS 
+    const mappedRooms = nsRooms.map(({ roomTitle }) => `<li class="room"> <span class="glyphicon"></span> ${roomTitle} </li>`).join(""); 
+    // SHOW THEM
+    document.querySelector(".room-list").innerHTML = mappedRooms;
 
     // CHOOSE ALL ROOMS
     const rooms = [...document.querySelectorAll(".room")];
 
-    // call joinRoom with concern room
-    rooms.forEach(room => {
-      room.addEventListener("click", e => joinRoom(e.target.innerText));
-    });
+    // call joinRoom by click 
+    rooms.forEach(room =>  room.addEventListener("click", e => joinRoom(e.target.innerText)));
 
-    // получим имя комнаты пространтсва
+    // join to first top room by default
     const topRoom = rooms[0];
-    const topRoomName = topRoom.innerText;
-
+    const topRoomName = topRoom.innerText; 
     joinRoom(topRoomName);
   });
 
-  // получим сообщения с сервера и отобразим
+  // GET MESSAGE FROM SERVER
   nsSocket.on("messageToClients", message => {
     const messageItem = ` <li>
                             <div class="user-image">
@@ -63,17 +44,17 @@ function joinNs(endpoint) {
 
     document.querySelector("#messages").innerHTML += messageItem;
   });
-  document
-    .querySelector(".message-form")
-    .addEventListener("submit", newMessage);
+
+  // SEND MESSAGE TO SERVER 
+  document.querySelector(".message-form").addEventListener("submit", newMessage);
 }
 
-// выберем форму, обработаем событие сабмита и получим значение инпута
+// FORM SUBMIT HANDLER
 function newMessage(e) {
   e.preventDefault();
   const newMessage = document.querySelector("#user-message").value;
   if (!newMessage) return;
-  // отправим сообщение на сервер
   nsSocket.emit("newMessageToServer", newMessage);
   e.target.reset();
 }
+ 
